@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\UploadController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,16 +18,9 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/whatis', function () {
-    return view('whatis');
-})->name('whatis');
-
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
-
-Route::get('/upload', [UploadController::class, 'showUploadForm'])->middleware(['auth', 'verified'])->name('upload');
-Route::post('/submit-form', [UploadController::class, 'uploadImage'])->middleware(['auth', 'verified'])->name('form.submit');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
