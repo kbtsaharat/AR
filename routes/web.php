@@ -23,6 +23,14 @@ Route::get('/whatis', function () {
     return view('whatis');
 })->name('whatis');
 
+Route::get('/list', function () {
+    return view('list');
+})->name('list');
+
+Route::get('/qanda', function () {
+    return view('qanda');
+})->name('qanda');
+
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
