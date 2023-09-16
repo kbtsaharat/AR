@@ -88,7 +88,7 @@
             if (data.Detect.length > 0) {
                 for (let i = 0; i < data.Detect.length; i++) {
                     htmlContent += `
-                <div style="margin-bottom: 10px; border: 1px solid #ccc; padding: 10px; background-color: #f9f9f9;">
+                    <div style="margin-bottom: 10px; border: 1px solid #ccc; padding: 10px;">
                     <strong>Object:</strong> ${data.Detect[i]}<br>
                     <strong>Probability:</strong> ${data.Probability[i]}%<br>
                     <strong>CO2D:</strong> ${data.CO2D[i]}<br>
