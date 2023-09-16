@@ -126,7 +126,7 @@
                 const formData = new FormData();
                 formData.append('image', blob, 'image.jpg');
 
-                fetch('https://exsinnot.com/upload', {
+                fetch('https://exsinnot.com/upload2', {
                         method: 'POST',
                         body: formData,
                     })
