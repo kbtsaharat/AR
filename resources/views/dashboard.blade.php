@@ -140,7 +140,7 @@
         const generatcarbonChart = new Chart(temperatureCtx, temperatureConfig);
 
         // Scanned Object List Chart Data
-        const labels = ['Eating', 'Drinking', 'Sleeping', 'Designing', 'Coding', 'Cycling', 'Running'];
+        const labels = ['Refrigerator', 'Car', 'Vase', 'Bottle', 'Phone', 'laptop', 'Person'];
 
         const radarData = {
             labels: labels,
