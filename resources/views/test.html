@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image and Object Display</title>
+</head>
+
+<body>
+    <div>
+        <h1>Image Information</h1>
+        <img src="https://images.inc.com/uploaded_files/image/1920x1080/getty_481292845_77896.jpg" alt="Image" width="500">
+        <ul>
+            <li>Tag Name: test</li>
+            <li>Origin Position: x: 90.79, y: 327.00</li>
+            <li>Size: width: 772.87, height: 670.34</li>
+            <li>Amount of CO2: 1</li>
+            <li>Info: test test test test test test test test test test</li>
+            <canvas id="canvas" style="max-width: 100%; height: auto;"></canvas>
+        </ul>
+        <!-- Add more details for other objects if needed -->
+    </div>
+
+    <script>
+        class InfoNode {
+            name; //obj name (tag)
+            id; //unique id
+            co2; //amount of co2
+            radius; //node size
+            //this.mass = this.co2 * this.co2; //need change formula and range (100? >= size > 0)
+            info; //info about obj
+            pos; //this node pos
+            parent; //parent node(ObjNode)
+            //this.showDetail = false; // is it showing detail
+
+            constructor(Name, Id, AmountOfCO2, Info, pos, parent) {
+                this.name = Name;
+                this.id = Id;
+                this.co2 = AmountOfCO2;
+                this.radius = 100;
+                this.info = Info;
+                this.pos = pos;
+                this.parent = parent;
+            }
+
+            EuclideanDis(dis) {
+                return Math.sqrt(dis.x * dis.x + dis.y * dis.y);
+            }
+
+            CalcForce(infoNodeList, objNodeList, f, cvs) {
+                var force = {
+                    x: 0.0,
+                    y: 0.0
+                };
+                const k = 1 * Math.sqrt(1);
+
+                //solve force with infoNodes
+                for (var i = 0; i < infoNodeList.length; i++) {
+                    var node = infoNodeList[i];
+                    if (node.id == this.id) continue;
+
+                    var D = {
+                        x: node.pos.x - this.pos.x,
+                        y: node.pos.y - this.pos.y
+                    };
+                    if (D.x == 0) {
+                        D.x = 0.01;
+                    }
+                    if (D.y == 0) {
+                        D.y = 0.01;
+                    }
+                    if (this.EuclideanDis(D) <= this.radius + node.radius) {
+                        force.x -= Math.max(Math.min(k * k / D.x * node.radius, 100), -100);
+                        force.y -= Math.max(Math.min(k * k / D.y * node.radius, 100), -100);
+                    }
+                }
+
+                //solve force with objNodes
+                for (var i = 0; i < objNodeList.length; i++) {
+                    var node = objNodeList[i];
+                    if (node == this.parent) continue;
+                    var D = {
+                        x: node.GetPos().x - this.pos.x,
+                        y: node.GetPos().y - this.pos.y
+                    };
+                    if (D.x == 0) {
+                        D.x = 0.01;
+                    }
+                    if (D.y == 0) {
+                        D.y = 0.01;
+                    }
+                    if (Math.abs(D.x) < node.size.w / 2 + this.radius + 10 && Math.abs(D.y) < node.h / 2 + this.radius + 10) {
+                        force.x -= Math.max(Math.min(k * k / D.x * node.size.w, 100), -100);
+                        force.y -= Math.max(Math.min(k * k / D.y * node.size.h, 100), -100);
+                    }
+                }
+
+                //solve force with parent
+                if (f) {
+                    var D = {
+                        x: this.parent.GetPos().x - this.pos.x,
+                        y: this.parent.GetPos().y - this.pos.y
+                    };
+                    if (D.x == 0) {
+                        D.x = 0.01;
+                    }
+                    if (D.y == 0) {
+                        D.y = 0.01;
+                    }
+                    if (Math.abs(D.x) < this.parent.size.w / 2 + this.radius + 10 && Math.abs(D.y) < this.parent.size.h / 2 + this.radius + 10) {
+                        if (this.parent.size.w / 2 + this.radius - Math.abs(D.x) < this.parent.size.h / 2 + this.radius - Math.abs(D.y)) {
+                            force.x -= Math.max(Math.min(k * k / D.x * node.size.w, 100), -100);
+                        } else {
+                            force.y -= Math.max(Math.min(k * k / D.y * node.size.h, 100), -100);
+                        }
+                    } else {
+                        if (Math.abs(D.x) - this.parent.size.w / 2 - this.radius > 20) {
+                            force.x += Math.max(Math.min(D.x / Math.abs(D.x) * k, 100), -100);
+                        }
+                        if (Math.abs(D.y) - this.parent.size.h / 2 - this.radius > 20) {
+                            force.y += Math.max(Math.min(D.y / Math.abs(D.y) * k, 100), -100);
+                        }
+                    }
+                }
+
+
+                this.Move(force, cvs);
+            }
+
+            Move(force, cvs) {
+                const magni = 3;
+                if (Math.abs(force.x) > 0.01) {
+                    this.pos.x += force.x * magni;
+                }
+                if (Math.abs(force.y) > 0.01) {
+                    this.pos.y += force.y * magni;
+                }
+
+                if (this.pos.x < this.radius) {
+                    this.pos.x = this.radius;
+                } else if (cvs.width - this.radius < this.pos.x) {
+                    this.pos.x = cvs.width - this.radius;
+                }
+
+                if (this.pos.y < this.radius) {
+                    this.pos.y = this.radius;
+                } else if (cvs.height - this.radius < this.pos.y) {
+                    this.pos.y = cvs.height - this.radius;
+                }
+            }
+
+            Show(context) {
+                context.beginPath();
+                context.arc(this.pos.x, this.pos.y, this.radius, 0 * Math.PI / 180, 360 * Math.PI / 180, false);
+                context.fillStyle = "rgba(255,255,255,0.8)";
+                context.fill();
+                context.strokeStyle = "black";
+                context.lineWidth = 2;
+                context.stroke();
+
+                context.fillStyle = 'black';
+                context.fillText('Person\nCO2:50L/s\nall human breathing ', this.pos.x, this.pos.y);
+
+
+            }
+        }
+
+        class ObjNode {
+            pos;
+            size;
+
+            constructor(pos, size) {
+                this.pos = pos; //this node pos
+                this.size = size; //this node size about h and w
+            }
+
+            Show(context) {
+                context.beginPath();
+                context.rect(this.pos.x, this.pos.y, this.size.width, this.size.height);
+                context.strokeStyle = "red";
+                context.lineWidth = 2;
+                context.stroke();
+            }
+
+            GetPos() {
+                return {
+                    x: this.pos.x + this.size.w / 2,
+                    y: this.pos.y + this.size.h / 2
+                };
+            }
+        }
+
+        var draggingId = -1;
+        var prevPos = {
+            x: 0,
+            y: 0
+        };
+        var infoList = [];
+        var objList = [];
+
+        function HandleMouseDown(e) {
+            //console.log("click");
+            prevPos.x = e.offsetX;
+            prevPos.y = e.offsetY;
+
+            for (var i = 0; i < infoList.length; i++) {
+                var node = infoList[i];
+                if (Math.sqrt((node.pos.x - prevPos.x) * (node.pos.x - prevPos.x) + (node.pos.y - prevPos.y) * (node.pos.y - prevPos.y)) < node.radius) {
+                    draggingId = i;
+                    console.log(i);
+                    break;
+                }
+            }
+        };
+
+        function HandleMouseUp(e) {
+            //console.log("mouseup");
+            draggingId = -1;
+        };
+
+        function HandleMouseMove(e) {
+            if (draggingId == -1) {
+                return;
+            }
+            //console.log("move");
+            var diffX = e.offsetX - prevPos.x;
+            var diffY = e.offsetY - prevPos.y;
+            prevPos.x = e.offsetX;
+            prevPos.y = e.offsetY;
+            infoList[draggingId].pos.x += diffX;
+            infoList[draggingId].pos.y += diffY;
+        };
+
+        function SetupCanvas(cvs) {
+            cvs.style.border = "4px solid";
+            cvs.width = 1280;
+            cvs.height = 1080;
+        }
+
+        // import data from "./data.json";
+
+        //this is main func, this will ran after loaded contents complete
+        window.onload = function() {
+            const cvs = document.getElementById("canvas");
+            const ctx = cvs.getContext("2d");
+            SetupCanvas(cvs);
+
+            cvs.addEventListener('mousedown', HandleMouseDown, false);
+            cvs.addEventListener('mouseup', HandleMouseUp, false);
+            cvs.addEventListener('mousemove', HandleMouseMove, false);
+
+
+            var img = new Image(); //新規画像オブジェクト
+            img.src = "./WIN_20230911_16_26_28_Pro.jpg" + data.imgName;
+            ctx.drawImage(img, 0, 0);
+            //console.log("ok");
+            for (var i = 0; i < data.objList.length; i++) {
+                console.log(i);
+                var obj = data.objList[i];
+                objList.push(new ObjNode(obj.originPos, obj.size));
+                infoList.push(new InfoNode(obj.tagName, i, obj.amountOfCO2, obj.info, {
+                    x: obj.originPos.x,
+                    y: obj.originPos.y
+                }, objList[i]));
+            }
+
+            var cnt = 0;
+
+            setInterval(() => {
+                cnt++;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0);
+                for (var i = 0; i < objList.length; i++) {
+                    var node = objList[i];
+                    node.Show(ctx);
+                }
+                for (var i = 0; i < infoList.length; i++) {
+                    var node = infoList[i];
+                    if (i != draggingId) {
+                        node.CalcForce(infoList, objList, (cnt < 100), cvs);
+                    }
+                    node.Show(ctx);
+                    //console.log("ok1");
+                    //console.log(node.id + " " + node.pos.x + ":" + node.pos.y);
+                }
+            }, 50);
+        };
+    </script>
+
+    <script>
+        // Your JavaScript code goes here
+
+        // If you want to dynamically generate objects based on the provided data, you can use JavaScript to do so.
+        const data = {
+            "imgName": "#",
+            "objList": [{
+                    "tagName": "test",
+                    "originPos": {
+                        "x": 90.79,
+                        "y": 327.00
+                    },
+                    "size": {
+                        "width": 772.87,
+                        "height": 670.34
+                    },
+                    "amountOfCO2": 1,
+                    "info": "test test test test test test test test test test"
+                },
+                {
+                    "tagName": "test2",
+                    "originPos": {
+                        "x": 901.64,
+                        "y": 125.30
+                    },
+                    "size": {
+                        "width": 1017.93,
+                        "height": 905.50
+                    },
+                    "amountOfCO2": 10,
+                    "info": "test2 test2 test2 test2 test2 test2 test2 test2 test2 test2"
+                },
+                {
+                    "tagName": "test3",
+                    "originPos": {
+                        "x": 267.34,
+                        "y": 787.71
+                    },
+                    "size": {
+                        "width": 275.38,
+                        "height": 214.76
+                    },
+                    "amountOfCO2": 100,
+                    "info": "test3 test3 test3 test3 test3 test3 test3 test3 test3 test3"
+                }
+            ]
+        };
+
+        // You can use this data to dynamically create elements on the page.
+
+        // For example, you can loop through the objList and create elements for each object.
+
+    </script>
+</body>
+
+</html>

@@ -31,12 +31,20 @@ Route::get('/qanda', function () {
     return view('qanda');
 })->name('qanda');
 
+Route::get('/test', function () {
+    return view('test');
+})->name('test');
+
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::get('/upload', [UploadController::class, 'showUploadForm'])->middleware(['auth', 'verified'])->name('upload');
 Route::post('/submit-form', [UploadController::class, 'uploadImage'])->middleware(['auth', 'verified'])->name('form.submit');
+
+Route::get('/camera', function () {
+    return view('camera');
+})->middleware(['auth', 'verified'])->name('camera');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

@@ -1,0 +1,26 @@
+{
+    "imgName":"WIN_20230911_16_26_28_Pro.jpg",
+    "objList":[
+        {
+            "tagName":"test",
+            "originPos":{"x":90.79, "y":327.00},
+            "size":{"width":772.87, "height":670.34},
+            "amountOfCO2":1,
+            "info":"test test test test test test test test test test"
+        },
+        {
+            "tagName":"test2",
+            "originPos":{"x":901.64, "y":125.30},
+            "size":{"width":1017.93,"height":905.50},
+            "amountOfCO2":10,
+            "info":"test2 test2 test2 test2 test2 test2 test2 test2 test2 test2"
+        },
+        {
+            "tagName":"test3",
+            "originPos":{"x":267.34, "y":787.71},
+            "size":{"width":275.38,"height":214.76},
+            "amountOfCO2":100,
+            "info":"test3 test3 test3 test3 test3 test3 test3 test3 test3 test3"
+        }
+    ]
+}
